@@ -109,9 +109,9 @@ pipeline {
 
                     withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
                         sh "ssh -i $SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} '${installDockerCommands}'"
+                        sh "ssh -i $SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} 'docker-compose -v'"
+
                     }
-                    sh "docker -v "
-                    sh "docker-compose -v "
 
                 }
             }
