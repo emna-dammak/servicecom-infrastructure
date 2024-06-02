@@ -10,6 +10,7 @@ pipeline {
         BACKEND_IMAGE = 'medazizbendhiab/service_com'
         FRONTEND_IMAGE = 'medazizbendhiab/service_com_reactjs'
         DOCKER_TAG = '1.0'
+        SSH_CREDENTIALS_ID = 'ssh-key' // Your SSH credentials ID
     }
 
     stages {
@@ -33,7 +34,7 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        sh " docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} ."
+                        sh "docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} ."
                     }
                 }
             }
@@ -54,7 +55,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                         sh "echo $PASS | docker login -u $USER --password-stdin"
-                        sh " docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
+                        sh "docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
                     }
                 }
             }
@@ -69,20 +70,18 @@ pipeline {
                     }
                 }
             }
-
         }
 
-            stage('provision server') {
-
+        stage('Provision Server with Terraform') {
             steps {
                 script {
-                    dir('terraform') {
+                    dir('servicecom-infrastructure/terraform') {
                         sh "terraform init"
                         sh "terraform apply --auto-approve"
                         sh "terraform refresh"
 
-                        EC2_PUBLIC_IP = sh(
-                            script: "terraform output public_ip",
+                        env.VM_PUBLIC_IP = sh(
+                            script: "terraform output -raw public_ip",
                             returnStdout: true
                         ).trim()
                     }
@@ -90,5 +89,42 @@ pipeline {
             }
         }
 
+        stage('Install Docker and Docker Compose on Azure VM') {
+            steps {
+                script {
+                    def vmInstance = "servicecom@${env.VM_PUBLIC_IP}"
+                    def installDockerCommands = """
+                        sudo apt-get update
+                        sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+                        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+                        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable"
+                        sudo apt-get update
+                        sudo apt-get install -y docker-ce
+                        sudo usermod -aG docker \$USER
+                        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
+                        sudo chmod +x /usr/local/bin/docker-compose
+                    """
+
+                    withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+                        sh "ssh -i $SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} '${installDockerCommands}'"
+                    }
+                    sh "docker -v "
+                    sh "docker-compose -v "
+
+                }
+            }
+        }
+
+        // Add other stages like deployment here
+
+    }
+
+    post {
+        always {
+            script {
+                // Additional clean up actions if necessary
+                sh 'docker system prune -f || true'
+            }
+        }
     }
 }
