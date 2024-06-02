@@ -85,7 +85,7 @@ pipeline {
                         env.VM_PUBLIC_IP = sh(
                             script: "terraform output public_ip",
                             returnStdout: true
-                        )
+                        ).trim()
                     }
                 }
             }
