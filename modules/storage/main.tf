@@ -10,11 +10,6 @@ resource "azurerm_storage_account" "servicecom_storage_account" {
   }
 }
 
-resource "azurerm_storage_container" "tfstate" {
-  name                  = var.tfstate_container_name
-  storage_account_name  = azurerm_storage_account.servicecom_storage_account.name
-  container_access_type = "private"
-}
 resource "azurerm_storage_container" "assets" {
   name                  = var.assets_container_name
   storage_account_name  = azurerm_storage_account.servicecom_storage_account.name
