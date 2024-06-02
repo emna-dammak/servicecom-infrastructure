@@ -114,6 +114,8 @@ pipeline {
                     sh "docker-compose -v "
 
                 }
+            }
+         }
 
     }
 }
