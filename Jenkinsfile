@@ -117,5 +117,24 @@ pipeline {
             }
          }
 
+               stage('Deploy') {
+            environment {
+                DOCKER_CREDS = credentials('docker-hub-credentials')
+            }
+            steps {
+                script {
+                    def vmInstance = "servicecom@${env.VM_PUBLIC_IP}"
+                    def shellCmd = "bash ./server-cmds.sh ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"
+
+                    withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+                        sh "scp -i $SSH_KEY -o StrictHostKeyChecking=no server-cmds.sh ${vmInstance}:/home/servicecom"
+                        sh "scp -i $SSH_KEY -o StrictHostKeyChecking=no docker-compose.yaml ${vmInstance}:/home/servicecom"
+                        sh "ssh -i $SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} '${shellCmd}'"
+                    }
+                }
+            }
+        }
+
+
     }
 }
