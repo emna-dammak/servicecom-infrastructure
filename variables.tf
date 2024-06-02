@@ -41,7 +41,7 @@ variable "subnet_prefix" {
 variable "ssh_adress_prefixes" {
   description = "The list of addresses allowed to ssh into the vm "
   type        = list(string)
-  default     = ["*"]
+  default     = ["0.0.0.0/0"]
 }
 
 #### Storage ####
