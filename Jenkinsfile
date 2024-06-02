@@ -10,7 +10,7 @@ pipeline {
         BACKEND_IMAGE = 'medazizbendhiab/service_com'
         FRONTEND_IMAGE = 'medazizbendhiab/service_com_reactjs'
         DOCKER_TAG = '1.0'
-        SSH_CREDENTIALS_ID = 'ssh-key' // Your SSH credentials ID
+        SSH_CREDENTIALS_ID ='ssh_key'
     }
 
     stages {
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        sh "docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} ."
+                        sh " docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} ."
                     }
                 }
             }
@@ -55,7 +55,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                         sh "echo $PASS | docker login -u $USER --password-stdin"
-                        sh "docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
+                        sh " docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
                     }
                 }
             }
@@ -70,18 +70,20 @@ pipeline {
                     }
                 }
             }
+
         }
 
-        stage('Provision Server with Terraform') {
+            stage('provision server') {
+
             steps {
                 script {
-                    dir('servicecom-infrastructure/terraform') {
+                    dir('terraform') {
                         sh "terraform init"
                         sh "terraform apply --auto-approve"
                         sh "terraform refresh"
 
-                        env.VM_PUBLIC_IP = sh(
-                            script: "terraform output -raw public_ip",
+                        VM_PUBLIC_IP = sh(
+                            script: "terraform output public_ip",
                             returnStdout: true
                         ).trim()
                     }
@@ -89,7 +91,7 @@ pipeline {
             }
         }
 
-        stage('Install Docker and Docker Compose on Azure VM') {
+         stage('Install Docker and Docker Compose on Azure VM') {
             steps {
                 script {
                     def vmInstance = "servicecom@${env.VM_PUBLIC_IP}"
@@ -112,19 +114,6 @@ pipeline {
                     sh "docker-compose -v "
 
                 }
-            }
-        }
 
-        // Add other stages like deployment here
-
-    }
-
-    post {
-        always {
-            script {
-                // Additional clean up actions if necessary
-                sh 'docker system prune -f || true'
-            }
-        }
     }
 }
