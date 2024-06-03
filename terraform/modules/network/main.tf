@@ -49,6 +49,20 @@ resource "azurerm_network_security_rule" "http" {
 
 }
 
+resource "azurerm_network_security_rule" "grafana" {
+  name                        = "allow-grafana"
+  priority                    = 1003
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "3001"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  network_security_group_name = azurerm_network_security_group.servicecom_nsg.name
+  resource_group_name = var.resource_group_name
+}
+
 resource "azurerm_public_ip" "servicecom-pub-ip" {
   name                = "servicecom-public-ip"
   location            = var.location
