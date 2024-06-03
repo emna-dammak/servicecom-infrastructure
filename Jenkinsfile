@@ -134,6 +134,19 @@ pipeline {
                 }
             }
         }
+        
+        stage('Monitoring') {
+            steps {
+                script {
+                    dir('monitoring')
+                    def vmInstance = "servicecom@${env.VM_PUBLIC_IP}"
+        
+                    withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+                        sh "ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} 'docker-compose up -d'"
+                    }
+                }
+            }
+        }
 
 
     }
