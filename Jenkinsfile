@@ -141,8 +141,8 @@ pipeline {
                     def vmInstance = "servicecom@${env.VM_PUBLIC_IP}"
                     
                     withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
-                        sh "scp -i \$SSH_KEY -o StrictHostKeyChecking=no monitoring/docker-compose.yml ${vmInstance}:/home/servicecom/docker-compose-monitoring.yml"
-                        sh "ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} 'docker-compose -f docker-compose-monitoring.yml up -d'"
+                        sh "scp -r \$SSH_KEY -o StrictHostKeyChecking=no monitoring ${vmInstance}:/home/servicecom"
+                        sh "ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ${vmInstance} 'docker-compose -f monitoring/docker-compose.yml up -d'"
                     }
                 }
             }
