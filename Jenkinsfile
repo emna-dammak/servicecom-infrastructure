@@ -79,6 +79,7 @@ pipeline {
                 script {
                     dir('terraform') {
                         sh "terraform init"
+                        sh "terraform apply -auto-approve"
                         sh "terraform apply -refresh-only -auto-approve"
 
                         env.VM_PUBLIC_IP = sh(
