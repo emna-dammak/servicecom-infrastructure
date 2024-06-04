@@ -7,12 +7,15 @@ services:
     container_name: my-mysql-container
     restart: always
     environment:
+      MYSQL_USER: "admin"
       MYSQL_ROOT_PASSWORD: "0000"
+      MYSQL_PASSWORD: "0000"
       MYSQL_DATABASE: "service_com"
     ports:
       - "3306:3306"
     volumes:
       - new-mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d
 
   nestjs:
     image: ${IMAGE_BACK}
