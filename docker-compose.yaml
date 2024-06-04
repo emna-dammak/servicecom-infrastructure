@@ -14,7 +14,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - new-mysql-data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d
 
   nestjs:
@@ -40,6 +40,3 @@ services:
     restart: always
     ports:
       - "80:3001"
-
-volumes:
-  new-mysql-data:
