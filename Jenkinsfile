@@ -73,20 +73,20 @@ pipeline {
 
         }
 
-            stage('provision server') {
-
+    stage('Provision Server') {
             steps {
                 script {
-                    dir('terraform') {
-                        sh "terraform init"
-                        sh " terraform force-unlock 27d855ef-1e9e-f156-e97b-ceb3201459f4 -auto-approve"
-                        sh "terraform apply -auto-approve"
-                        sh "terraform apply -refresh-only -auto-approve"
+                    retry(3) {
+                        dir('terraform') {
+                            sh "terraform init"
+                            sh "terraform apply -auto-approve"
+                            sh "terraform apply -refresh-only -auto-approve"
 
-                        env.VM_PUBLIC_IP = sh(
-                            script: "terraform output public_ip",
-                            returnStdout: true
-                        ).trim()
+                            env.VM_PUBLIC_IP = sh(
+                                script: "terraform output public_ip",
+                                returnStdout: true
+                            ).trim()
+                        }
                     }
                 }
             }
