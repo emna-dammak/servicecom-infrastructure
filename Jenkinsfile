@@ -73,20 +73,19 @@ pipeline {
 
         }
 
-    stage('Provision Server') {
+            stage('provision server') {
+
             steps {
                 script {
-                    retry(3) {
-                        dir('terraform') {
-                            sh "terraform init"
-                            sh "terraform apply -auto-approve"
-                            sh "terraform apply -refresh-only -auto-approve"
+                    dir('terraform') {
+                        sh "terraform init"
+                        sh "terraform apply -auto-approve"
+                        sh "terraform apply -refresh-only -auto-approve"
 
-                            env.VM_PUBLIC_IP = sh(
-                                script: "terraform output public_ip",
-                                returnStdout: true
-                            ).trim()
-                        }
+                        env.VM_PUBLIC_IP = sh(
+                            script: "terraform output public_ip",
+                            returnStdout: true
+                        ).trim()
                     }
                 }
             }
