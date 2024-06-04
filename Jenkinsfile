@@ -79,6 +79,7 @@ pipeline {
                 script {
                     dir('terraform') {
                         sh "terraform init"
+                        sh " terraform force-unlock 27d855ef-1e9e-f156-e97b-ceb3201459f4"
                         sh "terraform apply -auto-approve"
                         sh "terraform apply -refresh-only -auto-approve"
 
