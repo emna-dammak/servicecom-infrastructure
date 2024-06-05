@@ -5,7 +5,7 @@ pipeline {
         BACKEND_REPO = 'https://github.com/Manef-Ben-Mansour1/service-com-backend.git'
         FRONTEND_REPO = 'https://github.com/emna-dammak/service-com-Frontend.git'
         BACKEND_BRANCH = 'release/v2'
-        FRONTEND_BRANCH = 'feature/routing'
+        FRONTEND_BRANCH = 'release/v2'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
         BACKEND_IMAGE = 'medazizbendhiab/service_com'
         FRONTEND_IMAGE = 'medazizbendhiab/service_com_reactjs'
